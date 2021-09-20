@@ -11,8 +11,11 @@ app.use(express.static('public'));
 
 const userRouter = express.Router();
 const authRouter = express.Router();
+const forgetPasswordRouter = express.Router();
+
 app.use('/user', userRouter);
 app.use('/auth', authRouter);
+app.use('/forgetPassword', forgetPasswordRouter);
 
 userRouter
     .route('/')
@@ -21,13 +24,38 @@ userRouter
     .patch(updateUser)
     .delete(deleteUser)
 
-userRouter
-    .route('/:id')
-    .get(getUserById)
+// userRouter
+//     .route('/:id')
+//     .get(getUserById)
 
 authRouter
     .route('/signup')
     .post(signUpUser)
+
+forgetPasswordRouter
+    .route('/')
+    .get(getForgetPage)
+    .post(postForgetPage, validateEmail)
+
+function getForgetPage(req, res) {
+    res.sendFile('public/forgetPassword.html', { root: __dirname });
+}
+
+function postForgetPage(req, res, next) {
+    console.log(req.body.email);
+    // res.send("Request Submitted Successfully");
+    next();
+}
+
+function validateEmail(req, res) {
+    console.log("in validate email function");
+    console.log(req.body);
+
+    res.json({
+        message: "data received",
+        data: req.body
+    })
+}
 
 let user = [];
 
@@ -44,6 +72,16 @@ function signUpUser(req, res) {
 app.get('/', (req, res) => {
     res.send('Home Page');
 });
+
+// redirect
+app.get('/user-all', (req, res) => {
+    res.redirect('/user');
+});
+
+// 404 page not found
+app.use((req, res) => {
+    res.sendFile('public/404.html', { root: __dirname });
+})
 
 // app.get('/user', getUser);
 
