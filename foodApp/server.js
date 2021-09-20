@@ -1,4 +1,5 @@
 const express = require('express');
+const userModel = require('./models/userModel');
 const app = express();
 // const Router = express.Router();
 
@@ -30,7 +31,7 @@ userRouter
 
 authRouter
     .route('/signup')
-    .post(signUpUser)
+    .post(setCreatedAt, signUpUser)
 
 forgetPasswordRouter
     .route('/')
@@ -59,14 +60,34 @@ function validateEmail(req, res) {
 
 let user = [];
 
-function signUpUser(req, res) {
-    let { email, name, password } = req.body;
-    user.push({ email, name, password });
-    console.log('user', req.body);
-    res.json({
-        message: 'user signed up successfully',
-        user: req.body
-    })
+function setCreatedAt(req, res, next) {
+    let obj = req.body;
+    let length = Object.keys(obj).length;
+    if (length == 0) {
+        return res.status(400).json({
+            message: "cannot create user if req.body is empty"
+        })
+    }
+    req.body.createdAt = new Date();
+    next();
+}
+
+async function signUpUser(req, res) {
+    try {
+        let userObj = req.body;
+        let user = await userModel.create(userObj);
+        console.log('user', user);
+        res.json({
+            message: 'user signed up successfully',
+            user: userObj
+        });
+    }
+    catch (err) {
+        console.log(err);
+        res.json({
+            message: err.message
+        })
+    }
 }
 
 app.get('/', (req, res) => {
