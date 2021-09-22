@@ -1,6 +1,7 @@
 const express = require('express');
 const authRouter = express.Router();
 const userModel = require('../models/userModel');
+const sendMail = require('../nodeMailer');
 const JWT_KEY = require('../secretKey').JWT_KEY;
 const jwt = require('jsonwebtoken');
 
@@ -35,6 +36,7 @@ async function signUpUser(req, res) {
         let userObj = req.body;
         let user = await userModel.create(userObj);
         console.log('user', user);
+        sendMail(userObj);
         res.json({
             message: 'user signed up successfully',
             user: userObj
